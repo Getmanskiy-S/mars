@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, render_template, redirect
 from data import db_session
 from data.users import User
@@ -13,47 +15,15 @@ def main():
     db_session.global_init("db/blogs.db")
     db_sess = db_session.create_session()
     db_sess.commit()
-    user = User()
-    user.surname = "Scott"
-    user.name = "Ridley"
-    user.age = 21
-    user.position = "captain"
-    user.speciality = "research engineer"
-    user.address = "module_1"
-    user.email = "Ridley_chief@mars.org"
 
-    user2 = User()
-    user2.surname = "мужик"
-    user2.name = "1"
-    user2.age = 21
-    user2.position = "colonist"
-    user2.speciality = "research engineer"
-    user2.address = "module_1"
-    user2.email = "muzik1@mars.org"
+    job = Jobs()
+    job.team_leader = 1
+    job.job = 'Работа сверхурочно'
+    job.work_size = 15
+    job.collaborators = '2, 3'
+    job.start_date = datetime.now()
 
-    user3 = User()
-    user3.surname = "мужик"
-    user3.name = "2"
-    user3.age = 21
-    user3.position = "colonist"
-    user3.speciality = "research engineer"
-    user3.address = "module_1"
-    user3.email = "muzik2@mars.org"
-
-    user4 = User()
-    user4.surname = "мужик"
-    user4.name = "2"
-    user4.age = 21
-    user4.position = "colonist"
-    user4.speciality = "research engineer"
-    user4.address = "module_1"
-    user4.email = "muzik3@mars.org"
-
-    db_sess = db_session.create_session()
-    db_sess.add(user)
-    db_sess.add(user2)
-    db_sess.add(user3)
-    db_sess.add(user4)
+    db_sess.add(job)
     db_sess.commit()
     # app.run()
 
