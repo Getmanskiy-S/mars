@@ -3,7 +3,7 @@ from flask import Flask, redirect, render_template
 from data import db_session
 from data.jobs import Jobs
 from data.users import User
-from flask_login import LoginManager, login_user
+from flask_login import LoginManager, login_user, login_required, logout_user
 from data.login_form import LoginForm
 from data.add_job import AddJobForm
 from forms.user import RegisterForm
@@ -14,10 +14,12 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
+
 
 @app.route("/")
 def index():
@@ -26,6 +28,7 @@ def index():
     users = db_sess.query(User).all()
     names = {name.id: (name.surname, name.name) for name in users}
     return render_template("index.html", jobs=jobs, names=names, title='Work log')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -40,6 +43,7 @@ def login():
                                message="Неправильный логин или пароль",
                                form=form)
     return render_template('login.html', title='Авторизация', form=form)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -67,6 +71,7 @@ def register():
         return redirect('/')
     return render_template('register.html', title='Регистрация', form=form)
 
+
 @app.route('/addjob', methods=['GET', 'POST'])
 def addjob():
     add_form = AddJobForm()
@@ -85,9 +90,17 @@ def addjob():
     return render_template('addjob.html', title='Добавление работы', form=add_form)
 
 
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
+
+
 def main():
     db_session.global_init("db/mars_explorer.db")
     app.run()
+
 
 if __name__ == '__main__':
     main()
