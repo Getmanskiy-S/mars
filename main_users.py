@@ -7,6 +7,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user
 from data.login_form import LoginForm
 from data.add_job import AddJobForm
 from forms.user import RegisterForm
+from data import jobs_api
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -98,7 +99,8 @@ def logout():
 
 
 def main():
-    db_session.global_init("db/mars_explorer.db")
+    db_session.global_init("db/blogs.db")
+    app.register_blueprint(jobs_api.blueprint)
     app.run()
 
 
