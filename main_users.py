@@ -1,6 +1,6 @@
 import datetime
 from flask import Flask, redirect, render_template
-from data import db_session
+from data import db_session, users_resource
 from data.jobs import Jobs
 from data.users import User
 from flask_login import LoginManager, login_user, login_required, logout_user
@@ -8,8 +8,10 @@ from data.login_form import LoginForm
 from data.add_job import AddJobForm
 from forms.user import RegisterForm
 from data import jobs_api
+from flask_restful import Api
 
 app = Flask(__name__)
+api = Api(app)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
 login_manager = LoginManager()
@@ -101,6 +103,12 @@ def logout():
 def main():
     db_session.global_init("db/blogs.db")
     app.register_blueprint(jobs_api.blueprint)
+    # для списка объектов
+    api.add_resource(users_resource.UsersListResource, '/api/v2/users')
+
+    # для одного объекта
+    api.add_resource(users_resource.UsersResource, '/api/v2/users/<int:user_id>')
+
     app.run()
 
 
