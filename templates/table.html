@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Оформление каюты</h2>
+    <table border="1">
+        <tr>
+            <th>Цвет стен</th>
+            <th>Эмблема</th>
+        </tr>
+        <tr>
+            <td>
+                {% if gender == 'female' and age < 21 %}
+                    <div style="background-color: lightcoral; width: 200px; height: 200px;"></div>
+                {% elif gender == 'female' and age >= 21 %}
+                    <div style="background-color: coral; width: 200px; height: 200px;"></div>
+                {% elif gender == 'male' and age < 21 %}
+                    <div style="background-color: lightblue; width: 200px; height: 200px;"></div>
+                {% elif gender == 'male' and age >= 21 %}
+                    <div style="background-color: blue; width: 200px; height: 200px;"></div>
+                {% else %}
+                    Цвет не определен
+                {% endif %}
+            </td>
+            <td>
+                {% if age < 21 %}
+                    <img src="/static/img/mars_child.png" alt="Марсианин-ребенок" width="200">
+                {% else %}
+                    <img src="/static/img/mars_adult.png" alt="Марсианин-взрослый" width="200">
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+{% endblock %}

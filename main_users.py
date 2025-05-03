@@ -98,6 +98,12 @@ def logout():
     return redirect("/")
 
 
+# Маршрут для отображения таблицы
+@app.route('/table_param/<gender>/<int:age>')
+def table(gender, age):
+    return render_template('table.html', gender=gender, age=age)
+
+
 def main():
     db_session.global_init("db/blogs.db")
     app.register_blueprint(jobs_api.blueprint)
