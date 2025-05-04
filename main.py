@@ -4,6 +4,7 @@ from data.users import User
 from data.news import News
 from forms.user import ExtendedRegisterForm  # Импортируем ExtendedRegisterForm
 from data.jobs import Jobs
+from data.departments import Department
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -13,7 +14,7 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 def jobs():
     db_sess = db_session.create_session()
     jobs = db_sess.query(Jobs).all()
-    return render_template("jobs.html", jobs=jobs, db_sess=db_sess, User=User) # передаем User в шаблон
+    return render_template("jobs.html", jobs=jobs, db_sess=db_sess, User=User)  # передаем User в шаблон
 
 
 @app.route("/")
@@ -21,6 +22,7 @@ def index():
     db_sess = db_session.create_session()
     news = db_sess.query(News).filter(News.is_private != True)
     return render_template("index.html", news=news)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():  # Переименовали функцию в register
@@ -53,6 +55,22 @@ def register():  # Переименовали функцию в register
 
 def main():
     db_session.global_init("db/blogs.db")
+    # Создаем тестовый департамент
+    db_sess = db_session.create_session()
+
+    # Проверяем, есть ли уже департамент с таким названием
+    if not db_sess.query(Department).filter(Department.title == "Research").first():
+        department = Department()
+        department.title = "Research"
+        department.chief = 1  # ID руководителя
+        department.members = "2,3,4"  # Список ID участников через запятую
+        department.email = "research@mars.org"
+
+        db_sess.add(department)
+        db_sess.commit()
+        print("Department 'Research' added.")
+    else:
+        print("Department 'Research' already exists.")
     app.run()
 
 
