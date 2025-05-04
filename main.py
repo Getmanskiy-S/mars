@@ -1,8 +1,6 @@
-from datetime import datetime
-
 from flask import Flask, render_template, redirect
 from data import db_session
-from data.users import User
+from data.users import User  # Импортируем User
 from data.news import News
 from forms.user import RegisterForm
 from data.jobs import Jobs
@@ -11,21 +9,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
 
-def main():
-    db_session.global_init("db/blogs.db")
+@app.route("/jobs")
+def jobs():
     db_sess = db_session.create_session()
-    db_sess.commit()
-
-    job = Jobs()
-    job.team_leader = 1
-    job.job = 'Работа сверхурочно'
-    job.work_size = 15
-    job.collaborators = '2, 3'
-    job.start_date = datetime.now()
-
-    db_sess.add(job)
-    db_sess.commit()
-    # app.run()
+    jobs = db_sess.query(Jobs).all()
+    return render_template("jobs.html", jobs=jobs, db_sess=db_sess, User=User) # передаем User в шаблон
 
 
 @app.route("/")
@@ -33,7 +21,6 @@ def index():
     db_sess = db_session.create_session()
     news = db_sess.query(News).filter(News.is_private != True)
     return render_template("index.html", news=news)
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def reqister():
@@ -58,6 +45,11 @@ def reqister():
         db_sess.commit()
         return redirect('/')
     return render_template('register.html', title='Регистрация', form=form)
+
+
+def main():
+    db_session.global_init("db/blogs.db")
+    app.run()
 
 
 if __name__ == '__main__':
