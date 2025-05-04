@@ -1,8 +1,8 @@
 from flask import Flask, render_template, redirect
 from data import db_session
-from data.users import User  # Импортируем User
+from data.users import User
 from data.news import News
-from forms.user import RegisterForm
+from forms.user import ExtendedRegisterForm  # Импортируем ExtendedRegisterForm
 from data.jobs import Jobs
 
 app = Flask(__name__)
@@ -23,8 +23,8 @@ def index():
     return render_template("index.html", news=news)
 
 @app.route('/register', methods=['GET', 'POST'])
-def reqister():
-    form = RegisterForm()
+def register():  # Переименовали функцию в register
+    form = ExtendedRegisterForm()  # Используем ExtendedRegisterForm
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
             return render_template('register.html', title='Регистрация',
@@ -36,9 +36,13 @@ def reqister():
                                    form=form,
                                    message="Такой пользователь уже есть")
         user = User(
+            surname=form.surname.data,
             name=form.name.data,
-            email=form.email.data,
-            about=form.about.data
+            age=form.age.data,
+            position=form.position.data,
+            speciality=form.speciality.data,
+            address=form.address.data,
+            email=form.email.data
         )
         user.set_password(form.password.data)
         db_sess.add(user)
