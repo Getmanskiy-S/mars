@@ -53,3 +53,17 @@ def create_job():
     db_sess.add(job)
     db_sess.commit()
     return flask.jsonify({'id': job.id})
+
+@blueprint.route('/api/jobs/<int:job_id>', methods=['DELETE'])
+def delete_job(job_id):
+    db_sess = db_session.create_session()
+    job = db_sess.query(Jobs).get(job_id)
+
+    if not job:
+        return flask.make_response(flask.jsonify({'error': 'Not found'}), 404)
+
+    db_sess.delete(job)
+    db_sess.commit()
+
+    # Возвращаем пустой JSON и код 204 No Content, что является стандартом для успешного удаления
+    return flask.make_response('', 204)
