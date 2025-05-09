@@ -25,7 +25,7 @@ class User(SqlAlchemyBase, UserMixin):
 
     jobs = orm.relationship("Jobs", back_populates='user')
 
-# ##### Это надо отправить -- конец}
+    # ##### Это надо отправить -- конец}
     def __repr__(self):
         return f'<Colonist> {self.id} {self.surname} {self.name}'
 
@@ -34,3 +34,10 @@ class User(SqlAlchemyBase, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
+
+    def to_dict(self, only=None):
+        if only is None:
+            only = (
+                'id', 'surname', 'name', 'age', 'position', 'speciality', 'address',
+                'email')  # Или все поля, если нужно
+        return {field: getattr(self, field) for field in only}

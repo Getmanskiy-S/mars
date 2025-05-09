@@ -1,50 +1,74 @@
 import requests
 import json
 
-# ID работы, которую нужно отредактировать.  ОБЯЗАТЕЛЬНО ИЗМЕНИТЕ!
-JOB_ID_TO_EDIT = 1
+# Базовый URL API для пользователей
+API_BASE_URL = "http://127.0.0.1:5000/api/users"
 
-# URL API
-API_BASE_URL = "http://127.0.0.1:5000/api/jobs"
 
-# Данные, которые будут отправлены для обновления работы.  ОБЯЗАТЕЛЬНО ИЗМЕНИТЕ!
-# В этом примере изменяем только название работы и исполнителей.
-UPDATE_DATA = {
-    'job': 'Обновленное название работы',
-    'collaborators': '5, 6, 7'
-    # Вы можете добавить другие поля, которые нужно обновить
-    # Например:
-    # 'work_size': 20,
-    # 'is_finished': True
-}
-
-# Формируем URL для PUT запроса
-EDIT_URL = f"{API_BASE_URL}/{JOB_ID_TO_EDIT}"
-
-print(f"Отправляем PUT запрос на URL: {EDIT_URL}")
-print(f"Данные для обновления: {json.dumps(UPDATE_DATA, indent=4)}")  # Выводим JSON для наглядности
-
-# Отправляем PUT запрос
-response = requests.put(EDIT_URL, json=UPDATE_DATA)
-
-print(f"Получен статус код: {response.status_code}")
-
-# Проверяем статус код
-if response.status_code == 200:
-    print("Работа успешно отредактирована.")
-    print("JSON ответ сервера (обновленная работа):")
-    print(json.dumps(response.json(), indent=4))  # Красиво выводим JSON
-elif response.status_code == 404:
-    print("Ошибка: Работа с указанным ID не найдена.")
-else:
-    print(f"Произошла ошибка. Статус код: {response.status_code}")
+def print_response(response):
+    print(f"Статус код: {response.status_code}")
     try:
-        print(f"Сообщение об ошибке: {response.json()}")  # Пытаемся вывести сообщение об ошибке в JSON формате
+        print("JSON ответ:")
+        print(json.dumps(response.json(), indent=4))
     except json.JSONDecodeError:
-        print("Не удалось декодировать JSON из ответа сервера.")
+        print("Ответ не в формате JSON")
 
-print("\n--- Важно ---")
-print("1. Убедитесь, что Flask-приложение запущено.")
-print("2. Убедитесь, что работа с указанным JOB_ID_TO_EDIT существует в базе данных.")
-print("3. Отредактируйте UPDATE_DATA, указав нужные значения для обновления.")
-print("4. Проверьте логи Flask-приложения для получения дополнительной информации об ошибках.")
+
+def test_user_api():
+    print("--- Демонстрация работы User API ---")
+
+    # 1. Получение списка всех пользователей
+    print("\n1. Получение списка всех пользователей:")
+    response = requests.get(API_BASE_URL)
+    print_response(response)
+    if response.status_code != 200:
+        return  # Прекращаем выполнение, если произошла ошибка
+
+    # 2. Получение конкретного пользователя (предположим, что ID 1 существует)
+    print("\n2. Получение пользователя с ID 1:")
+    response = requests.get(f"{API_BASE_URL}/1")
+    print_response(response)
+    if response.status_code != 200:
+        return
+
+    # 3. Создание нового пользователя
+    print("\n3. Создание нового пользователя:")
+    new_user_data = {
+        "surname": "Иванов",
+        "name": "Иван",
+        "age": 30,
+        "position": "Инженер",
+        "speciality": "Программист",
+        "address": "Марс, ул. Гагарина, 1",
+        "email": "ivanov@mars.org"  # Уникальный email!
+    }
+    response = requests.post(API_BASE_URL, json=new_user_data)
+    print_response(response)
+    if response.status_code != 200:
+        return
+
+    new_user_id = response.json().get("id")
+    print(f"Создан пользователь с ID: {new_user_id}")
+
+    # 4. Редактирование пользователя
+    print("\n4. Редактирование пользователя (изменим должность):")
+    update_data = {
+        "position": "Старший инженер"
+    }
+    response = requests.put(f"{API_BASE_URL}/{new_user_id}", json=update_data)
+    print_response(response)
+    if response.status_code != 200:
+        return
+
+    # 5. Удаление пользователя
+    print("\n5. Удаление пользователя:")
+    response = requests.delete(f"{API_BASE_URL}/{new_user_id}")
+    print_response(response)
+    if response.status_code != 204:
+        return
+
+    print("\n--- Все операции выполнены ---")
+
+
+if __name__ == "__main__":
+    test_user_api()
