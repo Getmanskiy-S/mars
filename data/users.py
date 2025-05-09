@@ -22,6 +22,7 @@ class User(SqlAlchemyBase, UserMixin):
     email = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True, nullable=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     modified_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+    city_from = sqlalchemy.Column(sqlalchemy.String, nullable=True)  # Добавлено поле
 
     jobs = orm.relationship("Jobs", back_populates='user')
 
@@ -36,8 +37,7 @@ class User(SqlAlchemyBase, UserMixin):
         return check_password_hash(self.hashed_password, password)
 
     def to_dict(self, only=None):
+        """Преобразует объект в словарь, выбирая только указанные поля."""
         if only is None:
-            only = (
-                'id', 'surname', 'name', 'age', 'position', 'speciality', 'address',
-                'email')  # Или все поля, если нужно
+            only = ('id', 'surname', 'name', 'age', 'position', 'speciality', 'address', 'email', 'city_from')
         return {field: getattr(self, field) for field in only}

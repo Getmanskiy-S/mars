@@ -1,5 +1,6 @@
 import datetime
-from flask import Flask, redirect, render_template
+import requests
+from flask import Flask, redirect, render_template, abort
 from data import db_session
 from data.jobs import Jobs
 from data.users import User
@@ -21,6 +22,36 @@ def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
+
+@app.route('/users_show/<int:user_id>')
+def users_show(user_id):
+    """Показывает карту родного города пользователя."""
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).get(user_id)
+    if not user:
+        abort(404)  # Или обработайте отсутствие пользователя
+
+    if user.city_from:
+        # Используем геокодер для получения координат города
+        GEOCODER_API_KEY = "8013b162-6b42-4997-9691-77b7074026e0"  # <---- Ключ для геокодера
+        geocoder_request = f"https://geocode-maps.yandex.ru/1.x/?apikey={GEOCODER_API_KEY}&geocode={user.city_from}&format=json"
+        response = requests.get(geocoder_request)
+        if response.status_code == 200:
+            json_data = response.json()
+            try:
+                pos_str = json_data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point']['pos']
+                longitude, latitude = map(float, pos_str.split())  # Разделяем координаты
+                print(longitude, latitude)
+                return render_template('user_show.html', user=user, longitude=longitude, latitude=latitude)
+            except (KeyError, IndexError) as e:
+                # Обработка ошибок геокодирования (например, город не найден)
+                print(f"Ошибка при геокодировании: {e}")
+                return render_template('user_show.html', user=user, error="Не удалось определить координаты города.")
+        else:
+            print(f"Ошибка запроса геокодера: {response.status_code}")
+            return render_template('user_show.html', user=user, error="Ошибка при геокодировании города.")
+    else:
+        return render_template('user_show.html', user=user)
 
 @app.route("/")
 def index():

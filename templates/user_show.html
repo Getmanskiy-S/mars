@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.surname }} {{ user.name }} - {{ user.city_from }}</title>
+</head>
+<body>
+    <h1>{{ user.surname }} {{ user.name }} - {{ user.city_from }}</h1>
+
+    {% if user.city_from and longitude and latitude %}
+    <img src="https://static-maps.yandex.ru/v1?ll={{ longitude }},{{ latitude }}&spn=1.016457,0.00619&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13" alt="Карта {{ user.city_from }}">
+    {% elif user.city_from %}
+        <p>Не удалось отобразить карту: {{error}}</p>
+    {% else %}
+        <p>Родной город не указан.</p>
+    {% endif %}
+
+</body>
+</html>

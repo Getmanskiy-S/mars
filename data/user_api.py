@@ -53,7 +53,8 @@ def create_user():
         position=flask.request.json['position'],
         speciality=flask.request.json['speciality'],
         address=flask.request.json['address'],
-        email=flask.request.json['email']
+        email=flask.request.json['email'],
+        city_from=flask.request.json.get('city_from', None)  # Добавлено получение city_from
     )
     db_sess.add(user)
     db_sess.commit()
@@ -91,10 +92,12 @@ def edit_user(user_id):
         if db_sess.query(User).filter(User.email == flask.request.json['email'], User.id != user_id).first():
             return flask.make_response(flask.jsonify({'error': 'Email already exists'}), 400)
         user.email = flask.request.json['email']
+    if 'city_from' in flask.request.json:
+        user.city_from = flask.request.json['city_from']
 
     db_sess.commit()
     return flask.jsonify({'user': user.to_dict(
-        only=('id', 'surname', 'name', 'age', 'position', 'speciality', 'address', 'email'))})
+        only=('id', 'surname', 'name', 'age', 'position', 'speciality', 'address', 'email', 'city_from'))})
 
 
 # 5. Удаление пользователя (DELETE /api/users/<int:user_id>)
