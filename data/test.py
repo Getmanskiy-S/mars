@@ -1,8 +1,8 @@
 import requests
 import json
 
-# Базовый URL API для пользователей
-API_BASE_URL = "http://127.0.0.1:5000/api/users"
+# Базовый URL для API работ (Jobs)
+API_BASE_URL = "http://127.0.0.1:5000/api/v2/jobs"
 
 
 def print_response(response):
@@ -14,61 +14,60 @@ def print_response(response):
         print("Ответ не в формате JSON")
 
 
-def test_user_api():
-    print("--- Демонстрация работы User API ---")
+def test_jobs_api():
+    print("--- Демонстрация работы Jobs API ---")
 
-    # 1. Получение списка всех пользователей
-    print("\n1. Получение списка всех пользователей:")
+    # 1. Получение списка всех работ
+    print("\n1. Получение списка всех работ:")
     response = requests.get(API_BASE_URL)
     print_response(response)
     if response.status_code != 200:
-        return  # Прекращаем выполнение, если произошла ошибка
+        return
 
-    # 2. Получение конкретного пользователя (предположим, что ID 1 существует)
-    print("\n2. Получение пользователя с ID 1:")
+    # 2. Получение конкретной работы (предположим, что ID 1 существует)
+    print("\n2. Получение работы с ID 1:")
     response = requests.get(f"{API_BASE_URL}/1")
     print_response(response)
     if response.status_code != 200:
         return
 
-    # 3. Создание нового пользователя
-    print("\n3. Создание нового пользователя:")
-    new_user_data = {
-        "surname": "Иванов",
-        "name": "Иван",
-        "age": 30,
-        "position": "Инженер",
-        "speciality": "Программист",
-        "address": "Марс, ул. Гагарина, 1",
-        "email": "ivanov@mars.org"  # Уникальный email!
+    # 3. Создание новой работы
+    print("\n3. Создание новой работы:")
+    new_job_data = {
+        "job": "Тестирование REST API",
+        "team_leader": 1,
+        "work_size": 15,
+        "collaborators": "2,3,4",
+        "is_finished": False
     }
-    response = requests.post(API_BASE_URL, json=new_user_data)
+    response = requests.post(API_BASE_URL, data=new_job_data)  # Используем data=, а не json=
     print_response(response)
-    if response.status_code != 200:
+    if response.status_code != 201:  # Ожидаем код 201 (Created)
         return
 
-    new_user_id = response.json().get("id")
-    print(f"Создан пользователь с ID: {new_user_id}")
+    new_job_id = response.json().get("id")
+    print(f"Создана работа с ID: {new_job_id}")
 
-    # 4. Редактирование пользователя
-    print("\n4. Редактирование пользователя (изменим должность):")
+    # 4. Редактирование работы
+    print("\n4. Редактирование работы (изменим job и is_finished):")
     update_data = {
-        "position": "Старший инженер"
+        "job": "Тестирование REST API - ОБНОВЛЕНО",
+        "is_finished": True
     }
-    response = requests.put(f"{API_BASE_URL}/{new_user_id}", json=update_data)
+    response = requests.put(f"{API_BASE_URL}/{new_job_id}", data=update_data)  # Используем data=
     print_response(response)
     if response.status_code != 200:
         return
 
-    # 5. Удаление пользователя
-    print("\n5. Удаление пользователя:")
-    response = requests.delete(f"{API_BASE_URL}/{new_user_id}")
+    # 5. Удаление работы
+    print("\n5. Удаление работы:")
+    response = requests.delete(f"{API_BASE_URL}/{new_job_id}")
     print_response(response)
-    if response.status_code != 204:
+    if response.status_code != 204:  # Ожидаем код 204 (No Content)
         return
 
     print("\n--- Все операции выполнены ---")
 
 
 if __name__ == "__main__":
-    test_user_api()
+    test_jobs_api()
