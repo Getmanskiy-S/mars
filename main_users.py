@@ -5,7 +5,7 @@ from data.jobs import Jobs
 from data.users import User
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.login_form import LoginForm
-from data.add_job import AddJobForm  # Используем существующую форму
+from data.add_job import AddJobForm
 from forms.user import RegisterForm
 
 app = Flask(__name__)
@@ -73,7 +73,7 @@ def register():
 
 
 @app.route('/addjob', methods=['GET', 'POST'])
-@login_required  # Требуется авторизация для добавления работы
+@login_required
 def addjob():
     add_form = AddJobForm()
     if add_form.validate_on_submit():
@@ -98,13 +98,12 @@ def edit_job(id):
     job = db_sess.query(Jobs).get(id)
 
     if not job:
-        abort(404)  # Работа не найдена
+        abort(404)
 
-    # Проверка прав доступа
     if job.team_leader != current_user.id and current_user.id != 1:
-        abort(403)  # Нет прав доступа
+        abort(403)
 
-    form = AddJobForm(obj=job)  # Заполняем форму данными из объекта job
+    form = AddJobForm(obj=job)
 
     if form.validate_on_submit():
         job.job = form.job.data
@@ -114,9 +113,26 @@ def edit_job(id):
         job.is_finished = form.is_finished.data
 
         db_sess.commit()
-        return redirect('/')  # Или на страницу с информацией о работе
+        return redirect('/')
 
     return render_template('addjob.html', title='Редактирование работы', form=form)
+
+
+@app.route('/job/<int:id>/delete', methods=['GET', 'POST'])
+@login_required
+def delete_job(id):
+    db_sess = db_session.create_session()
+    job = db_sess.query(Jobs).get(id)
+
+    if not job:
+        abort(404)
+
+    if job.team_leader != current_user.id and current_user.id != 8:
+        abort(403)
+
+    db_sess.delete(job)
+    db_sess.commit()
+    return redirect('/')
 
 
 @app.route('/logout')
