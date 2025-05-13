@@ -127,7 +127,7 @@ def delete_job(id):
     if not job:
         abort(404)
 
-    if job.team_leader != current_user.id and current_user.id != 8:
+    if job.team_leader != current_user.id and current_user.id != 1:
         abort(403)
 
     db_sess.delete(job)
