@@ -1,13 +1,11 @@
 import datetime
 import sqlalchemy
 from sqlalchemy import orm
-from sqlalchemy_serializer import SerializerMixin
 
 from .db_session import SqlAlchemyBase
 
-# ##### Это надо отправить -- начало{
-# Модель Работы
-class Jobs(SqlAlchemyBase, SerializerMixin):
+
+class Jobs(SqlAlchemyBase):
     __tablename__ = 'jobs'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
@@ -20,6 +18,5 @@ class Jobs(SqlAlchemyBase, SerializerMixin):
     team_leader = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     user = orm.relationship('User')
 
-    # ##### Это надо отправить -- конец}
     def __repr__(self):
         return f'<Job> {self.job}'
