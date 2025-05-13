@@ -3,10 +3,12 @@ from data import db_session
 import datetime
 from data.jobs import Jobs
 from data.users import User
+from data.departaments import Department  # Added
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.login_form import LoginForm
 from data.add_job import AddJobForm
 from forms.user import RegisterForm
+from forms.department import DepartmentForm  # Added
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -140,6 +142,73 @@ def delete_job(id):
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.route('/departments')
+def departments():
+    db_sess = db_session.create_session()
+    departments = db_sess.query(Department).all()
+    users = db_sess.query(User).all()
+    names = {name.id: (name.surname, name.name) for name in users}
+    return render_template('departments.html', departments=departments, names=names, title='List of Departments')
+
+
+@app.route('/departments/add', methods=['GET', 'POST'])
+@login_required
+def add_department():
+    form = DepartmentForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        department = Department(
+            title=form.title.data,
+            chief=form.chief.data,
+            members=form.members.data,
+            email=form.email.data
+        )
+        db_sess.add(department)
+        db_sess.commit()
+        return redirect('/departments')
+    return render_template('department_form.html', title='Add Department', form=form)
+
+
+@app.route('/departments/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_department(id):
+    db_sess = db_session.create_session()
+    department = db_sess.query(Department).get(id)
+    if not department:
+        abort(404)
+
+    # Права доступа (только капитан может редактировать департаменты)
+    if current_user.id != 1:
+        abort(403)
+
+    form = DepartmentForm(obj=department)
+    if form.validate_on_submit():
+        department.title = form.title.data
+        department.chief = form.chief.data
+        department.members = form.members.data
+        department.email = form.email.data
+        db_sess.commit()
+        return redirect('/departments')
+    return render_template('department_form.html', title='Edit Department', form=form)
+
+
+@app.route('/departments/<int:id>/delete', methods=['GET', 'POST'])
+@login_required
+def delete_department(id):
+    db_sess = db_session.create_session()
+    department = db_sess.query(Department).get(id)
+    if not department:
+        abort(404)
+
+    # Права доступа (только капитан может удалять департаменты)
+    if current_user.id != 1:
+        abort(403)
+
+    db_sess.delete(department)
+    db_sess.commit()
+    return redirect('/departments')
 
 
 def main():
