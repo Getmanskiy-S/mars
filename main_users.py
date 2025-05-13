@@ -211,8 +211,13 @@ def delete_department(id):
     return redirect('/departments')
 
 
+# в main_users.py в функции main()
 def main():
     db_session.global_init("db/mars_explorer.db")
+    # Добавьте эти строки
+    # db_sess = db_session.create_session()
+    # db_session.SqlAlchemyBase.metadata.drop_all(db_sess.bind)
+    # db_session.SqlAlchemyBase.metadata.create_all(db_sess.bind)
     app.run()
 
 

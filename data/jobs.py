@@ -1,8 +1,8 @@
 import datetime
 import sqlalchemy
 from sqlalchemy import orm
-
 from .db_session import SqlAlchemyBase
+from .job_category import JobCategory  # Import the new model
 
 
 class Jobs(SqlAlchemyBase):
@@ -17,6 +17,8 @@ class Jobs(SqlAlchemyBase):
     is_finished = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
     team_leader = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     user = orm.relationship('User')
+
+    categories = orm.relationship("Category", secondary="job_categories", backref="jobs")  # Add the relationship
 
     def __repr__(self):
         return f'<Job> {self.job}'
